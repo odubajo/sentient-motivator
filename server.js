@@ -3,22 +3,17 @@ const axios = require('axios');
 const dotenv = require('dotenv');
 const path = require('path');
 
-
 dotenv.config();
 
-
 const app = express();
-const port = 3000;
-
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
-
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
-
 
 app.post('/motivate', async (req, res) => {
     const { feeling, responseType } = req.body;
@@ -49,4 +44,28 @@ app.post('/motivate', async (req, res) => {
                         content: feeling
                     }
                 ],
-                temperature:
+                temperature: 0.7,
+                max_tokens: 200
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        const motivation = response.data.choices[0].message.content;
+        res.json({ motivation });
+
+    } catch (error) {
+        console.error('Error calling Fireworks API:', error.response?.data || error.message);
+        res.status(500).json({ 
+            error: 'Failed to generate motivation. Please try again later.' 
+        });
+    }
+});
+
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
