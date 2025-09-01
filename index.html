@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motivation Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            flex-direction: column;
+        }
+        .container {
+            background-color: white;
+            padding: 2em;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .powered-by {
+            margin-bottom: 1em;
+            font-size: 0.8em;
+            color: #777;
+        }
+        label {
+            display: block;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 2em;
+            padding: 1em;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            min-height: 50px;
+        }
+        #loading {
+            display: none;
+            color: #007bff;
+            margin-top: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Motivation Generator</h1>
+        <div class="powered-by">
+            Powered by dobby for the sentient community
+        </div>
+        <form id="motivationForm">
+            <label for="feeling">How are you feeling today?</label>
+            <input type="text" id="feeling" name="feeling" placeholder="e.g., Anxious about an exam" required>
+
+            <label for="responseType">Select a response type:</label>
+            <select id="responseType" name="responseType">
+                <option value="A quick pep talk">A quick pep talk</option>
+                <option value="A thought-provoking quote">A thought-provoking quote</option>
+                <option value="A brief mindfulness exercise">A brief mindfulness exercise</option>
+                <option value="A simple action to take">A simple action to take</option>
+            </select>
+
+            <button type="submit">Get Motivation</button>
+        </form>
+        <div id="loading">Loading...</div>
+        <div class="result" id="motivationResult">
+            Your motivational message will appear here.
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('motivationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const feeling = document.getElementById('feeling').value;
+            const responseType = document.getElementById('responseType').value;
+            const motivationResult = document.getElementById('motivationResult');
+            const loading = document.getElementById('loading');
+
+            motivationResult.textContent = '';
+            loading.style.display = 'block';
+
+            try {
+                const response = await fetch('/motivate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ feeling, responseType })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Something went wrong');
+                }
+
+                const data = await response.json();
+                motivationResult.textContent = data.motivation;
+
+            } catch (error) {
+                motivationResult.textContent = `Error: ${error.message}`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
